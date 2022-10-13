@@ -9,7 +9,7 @@ namespace ACS_Lab2
 	{
 		private Random _random = new Random();
 
-		public Stopwatch SWAllTime { get; private set; } = new Stopwatch();
+		private Stopwatch SWAllTime { get; set; } = new Stopwatch();
 
 		public string GetCPUName()
 		{
@@ -31,23 +31,51 @@ namespace ACS_Lab2
 		{
 			using (var writer = new StreamWriter("file.csv"))
 			{
-				using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
+				using (var csv = new CsvWriter(writer, CultureInfo.CurrentCulture))
 				{
 					csv.WriteRecords(list);
 				}
 			}
 		}
 
-		public void int_matrix_mul(int[,] matrix_A, int[,] matrix_B, int[,] matrix_RESULT, int MATRIX_SIZE)
+		public void IntMulPow(int[] arr1, int[] arr2, int count)
 		{
-			for (int i = 0; i < MATRIX_SIZE; ++i)
+			var length1 = arr1.Length;
+			var length2 = arr2.Length;
+
+			for (int i = 0; i < length1; i++)
 			{
-				for (int j = 0; j < MATRIX_SIZE; ++j)
+				for (int j = 0; j < length2; j++)
 				{
-					for (int k = 0; k < MATRIX_SIZE; ++k)
-					{
-						matrix_RESULT[i, j] += matrix_A[i, k] * matrix_B[k, j];
-					}
+					Math.Pow(arr1[i] * arr2[j], 2);
+				}
+			}	
+		}
+
+		public void DoubleMulSin(double[] arr1, double[] arr2, int count)
+		{
+			var length1 = arr1.Length;
+			var length2 = arr2.Length;
+
+			for (int i = 0; i < length1; i++)
+			{
+				for (int j = 0; j < length2; j++)
+				{
+					Math.Sin(Math.Pow(arr1[i] * arr2[j], 2));
+				}
+			}
+		}
+
+		public void DoubleMulCos(double[] arr1, double[] arr2, int count)
+		{
+			var length1 = arr1.Length;
+			var length2 = arr2.Length;
+
+			for (int i = 0; i < length1; i++)
+			{
+				for (int j = 0; j < length2; j++)
+				{
+					Math.Cos(Math.Pow(arr1[i] * arr2[j], 2));
 				}
 			}
 		}
@@ -55,11 +83,13 @@ namespace ACS_Lab2
 		public void Run()
 		{
 			SWAllTime.Start();
+
+			#region Vars
 			var cpuName = GetCPUName();
 
 			var listInfo = new List<Info>();
-			const int MATRIX_SIZE = 100;
-			const int LAUNCH_COUNT = 200;
+			const int SIZE_ARR = 2000;
+			const int LAUNCH_COUNT = 10;
 			string opt = "None";
 
 			var sw = new Stopwatch();
@@ -68,72 +98,26 @@ namespace ACS_Lab2
 			double summand1 = 0;
 			double summand2 = 0;
 			var time = new double[LAUNCH_COUNT];
+			#endregion
 
-			/* ПЕРЕМНОЖЕНИЕ МАТРИЦ (int) */
-			int[,] matrix_A_i = new int[MATRIX_SIZE, MATRIX_SIZE];
-			var matrix_B_i = new int[MATRIX_SIZE, MATRIX_SIZE];
-			var matrix_RESULT_i = new int[MATRIX_SIZE, MATRIX_SIZE];
+			#region IntMulPow
+			var arr1 = new int[SIZE_ARR];
+			var arr2 = new int[SIZE_ARR];
 
-			for (int i = 0; i < MATRIX_SIZE; ++i)
+			for (int i = 0; i < SIZE_ARR; ++i)
 			{
-				for (int j = 0; j < MATRIX_SIZE; ++j)
-				{
-					matrix_A_i[i, j] = _random.Next(0, 3000);
-					matrix_B_i[i, j] = _random.Next(0, 3000);
-					matrix_RESULT_i[i, j] = 0;
-				}
+				arr1[i] = _random.Next(0, 3000);
+				arr2[i] = _random.Next(0, 3000);
 			}
 
-			for (int i = 0; i < LAUNCH_COUNT; ++i)
-			{
-				sw.Start();
-
-				int_matrix_mul(matrix_A_i, matrix_B_i, matrix_RESULT_i, MATRIX_SIZE);
-
-				sw.Stop();
-
-				time[i] = sw.ElapsedMilliseconds;
-				sum_time += time[i];
-				summand1 += time[i] * time[i];
-				summand2 += time[i];
-			}
-
-			dispersion = summand1 / LAUNCH_COUNT - summand2 / LAUNCH_COUNT;
-			double aver = sum_time / LAUNCH_COUNT;
+			Info info = null;
+			double aver = 0;
 			double absver = 0;
-
-			for (int i = 0; i < LAUNCH_COUNT; ++i)
-			{
-				absver += Math.Abs(aver - time[i]);
-			}
-
-			absver /= LAUNCH_COUNT;
-
-			var info = new Info(cpuName, "int", opt, LAUNCH_COUNT, aver, time[0], dispersion, absver, MATRIX_SIZE);
-			listInfo.Add(info);
-
-			SaveToCSV(listInfo);
-
-			/* ПЕРЕМНОЖЕНИЕ МАТРИЦ (int) */
-			matrix_A_i = new int[MATRIX_SIZE, MATRIX_SIZE];
-			matrix_B_i = new int[MATRIX_SIZE, MATRIX_SIZE];
-			matrix_RESULT_i = new int[MATRIX_SIZE, MATRIX_SIZE];
-
-			for (int i = 0; i < MATRIX_SIZE; ++i)
-			{
-				for (int j = 0; j < MATRIX_SIZE; ++j)
-				{
-					matrix_A_i[i, j] = _random.Next(0, 3000);
-					matrix_B_i[i, j] = _random.Next(0, 3000);
-					matrix_RESULT_i[i, j] = 0;
-				}
-			}
-
 			for (int i = 0; i < LAUNCH_COUNT; ++i)
 			{
 				sw.Start();
 
-				int_matrix_mul(matrix_A_i, matrix_B_i, matrix_RESULT_i, MATRIX_SIZE);
+				IntMulPow(arr1, arr2, LAUNCH_COUNT);
 
 				sw.Stop();
 
@@ -141,26 +125,106 @@ namespace ACS_Lab2
 				sum_time += time[i];
 				summand1 += time[i] * time[i];
 				summand2 += time[i];
-			}
 
-			dispersion = summand1 / LAUNCH_COUNT - summand2 / LAUNCH_COUNT;
-			aver = sum_time / LAUNCH_COUNT;
-			absver = 0;
+				aver = sum_time / LAUNCH_COUNT;
+				absver += sw.ElapsedMilliseconds;
+				absver = absver / (i + 1);
 
-			for (int i = 0; i < LAUNCH_COUNT; ++i)
-			{
-				absver += Math.Abs(aver - time[i]);
+				info = new Info(cpuName, "int", opt, LAUNCH_COUNT, absver, sw.ElapsedMilliseconds, dispersion, absver, LAUNCH_COUNT / absver, nameof(IntMulPow));
+				listInfo.Add(info);
 			}
 
 			absver /= LAUNCH_COUNT;
 
-			info = new Info(cpuName, "int", opt, LAUNCH_COUNT, aver, time[0], dispersion, absver, MATRIX_SIZE);
-			listInfo.Add(info);
+			SaveToCSV(listInfo);
+			sw.Reset();
+			#endregion
+
+			#region DoubleMulSin
+			var arr3 = new double[SIZE_ARR];
+			var arr4 = new double[SIZE_ARR];
+
+			for (int i = 0; i < SIZE_ARR; ++i)
+			{
+				arr3[i] = _random.Next(0, 3000);
+				arr4[i] = _random.Next(0, 3000);
+			}
+
+			info = null;
+			aver = 0;
+			absver = 0;
+			for (int i = 0; i < LAUNCH_COUNT; ++i)
+			{
+				sw.Start();
+
+				DoubleMulSin(arr3, arr4, LAUNCH_COUNT);
+
+				sw.Stop();
+
+				time[i] = sw.ElapsedMilliseconds;
+				sum_time += time[i];
+				summand1 += time[i] * time[i];
+				summand2 += time[i];
+
+				aver = sum_time / LAUNCH_COUNT;
+				for (int j = 0; j < LAUNCH_COUNT; ++j)
+				{
+					absver += Math.Abs(aver - time[j]);
+				}
+				absver /= LAUNCH_COUNT;
+
+				info = new Info(cpuName, "double", opt, LAUNCH_COUNT, aver, time[0], dispersion, LAUNCH_COUNT / aver, absver, nameof(DoubleMulSin));
+				listInfo.Add(info);
+			}
 
 			SaveToCSV(listInfo);
+			sw.Reset();
+			#endregion
+
+			#region DoubleMulCos
+			var arr5 = new double[SIZE_ARR];
+			var arr6 = new double[SIZE_ARR];
+
+			for (int i = 0; i < SIZE_ARR; ++i)
+			{
+				arr5[i] = _random.Next(0, 3000);
+				arr6[i] = _random.Next(0, 3000);
+			}
+
+			info = null;
+			aver = 0;
+			absver = 0;
+			for (int i = 0; i < LAUNCH_COUNT; ++i)
+			{
+				sw.Start();
+
+				DoubleMulCos(arr5, arr6, SIZE_ARR);
+
+				sw.Stop();
+
+				time[i] = sw.ElapsedMilliseconds;
+				sum_time += time[i];
+				summand1 += time[i] * time[i];
+				summand2 += time[i];
+
+				aver = sum_time / LAUNCH_COUNT;
+				for (int j = 0; j < LAUNCH_COUNT; ++j)
+				{
+					absver += Math.Abs(aver - time[j]);
+				}
+				absver /= LAUNCH_COUNT;
+
+				//TODO: Сделать AbsError - Absolute error
+				//TODO: Сделать RelError - Relative error
+				info = new Info(cpuName, "double", opt, LAUNCH_COUNT, aver, time[0], dispersion, LAUNCH_COUNT / aver, absver, nameof(DoubleMulCos));
+				listInfo.Add(info);
+			}
+
+			SaveToCSV(listInfo);
+			sw.Reset();
+			#endregion
 
 			SWAllTime.Stop();
-
 			Console.WriteLine($"All time: {SWAllTime.ElapsedMilliseconds}");
 		}
 	}
