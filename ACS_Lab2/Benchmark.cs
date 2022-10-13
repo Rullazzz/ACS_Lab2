@@ -84,20 +84,21 @@ namespace ACS_Lab2
 		{
 			SWAllTime.Start();
 
-			#region Vars
-			var cpuName = GetCPUName();
-
+			#region Vars		
 			var listInfo = new List<Info>();
+			var sw = new Stopwatch();
+
 			const int SIZE_ARR = 2000;
 			const int LAUNCH_COUNT = 10;
-			string opt = "None";
 
-			var sw = new Stopwatch();
+			string cpuName = GetCPUName();
+			string opt = "None";
+			double allSumTime = 0;
 			double sum_time = 0;
 			double dispersion = 0;
 			double summand1 = 0;
 			double summand2 = 0;
-			var time = new double[LAUNCH_COUNT];
+			double[] time = new double[LAUNCH_COUNT];
 			#endregion
 
 			#region IntMulPow
@@ -112,7 +113,7 @@ namespace ACS_Lab2
 
 			Info info = null;
 			double aver = 0;
-			double absver = 0;
+			double absver = 0;			
 			for (int i = 0; i < LAUNCH_COUNT; ++i)
 			{
 				sw.Start();
@@ -127,11 +128,14 @@ namespace ACS_Lab2
 				summand2 += time[i];
 
 				aver = sum_time / LAUNCH_COUNT;
-				absver += sw.ElapsedMilliseconds;
-				absver = absver / (i + 1);
+				allSumTime += sw.ElapsedMilliseconds;
+				absver = allSumTime / (i + 1);
 
+				//TODO: Сделать AbsError - Absolute error
+				//TODO: Сделать RelError - Relative error
 				info = new Info(cpuName, "int", opt, LAUNCH_COUNT, absver, sw.ElapsedMilliseconds, dispersion, absver, LAUNCH_COUNT / absver, nameof(IntMulPow));
 				listInfo.Add(info);
+				sw.Reset();
 			}
 
 			absver /= LAUNCH_COUNT;
@@ -173,6 +177,8 @@ namespace ACS_Lab2
 				}
 				absver /= LAUNCH_COUNT;
 
+				//TODO: Сделать AbsError - Absolute error
+				//TODO: Сделать RelError - Relative error
 				info = new Info(cpuName, "double", opt, LAUNCH_COUNT, aver, time[0], dispersion, LAUNCH_COUNT / aver, absver, nameof(DoubleMulSin));
 				listInfo.Add(info);
 			}
