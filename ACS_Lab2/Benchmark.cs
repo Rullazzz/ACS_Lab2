@@ -49,7 +49,7 @@ namespace ACS_Lab2
 				{
 					Math.Pow(arr1[i] * arr2[j], 2);
 				}
-			}	
+			}
 		}
 
 		public void DoubleMulSin(double[] arr1, double[] arr2, int count)
@@ -94,11 +94,6 @@ namespace ACS_Lab2
 			string cpuName = GetCPUName();
 			string opt = "None";
 			double allSumTime = 0;
-			double sum_time = 0;
-			double dispersion = 0;
-			double summand1 = 0;
-			double summand2 = 0;
-			double[] time = new double[LAUNCH_COUNT];
 			#endregion
 
 			#region IntMulPow
@@ -112,8 +107,8 @@ namespace ACS_Lab2
 			}
 
 			Info info = null;
-			double aver = 0;
-			double absver = 0;			
+			double averTime = 0;
+			double absErr = 0;
 			for (int i = 0; i < LAUNCH_COUNT; ++i)
 			{
 				sw.Start();
@@ -122,23 +117,14 @@ namespace ACS_Lab2
 
 				sw.Stop();
 
-				time[i] = sw.ElapsedMilliseconds;
-				sum_time += time[i];
-				summand1 += time[i] * time[i];
-				summand2 += time[i];
-
-				aver = sum_time / LAUNCH_COUNT;
 				allSumTime += sw.ElapsedMilliseconds;
-				absver = allSumTime / (i + 1);
+				averTime = allSumTime / (i + 1);
+				absErr = Math.Abs(averTime - sw.ElapsedMilliseconds);
 
-				//TODO: Сделать AbsError - Absolute error
-				//TODO: Сделать RelError - Relative error
-				info = new Info(cpuName, "int", opt, LAUNCH_COUNT, absver, sw.ElapsedMilliseconds, dispersion, absver, LAUNCH_COUNT / absver, nameof(IntMulPow));
+				info = new Info(cpuName, "int", opt, SIZE_ARR * SIZE_ARR, averTime / 1000, sw.ElapsedMilliseconds / 1000.0, absErr / 1000, SIZE_ARR * SIZE_ARR / (averTime / 1000), LAUNCH_COUNT, nameof(IntMulPow));
 				listInfo.Add(info);
 				sw.Reset();
 			}
-
-			absver /= LAUNCH_COUNT;
 
 			SaveToCSV(listInfo);
 			sw.Reset();
@@ -154,9 +140,7 @@ namespace ACS_Lab2
 				arr4[i] = _random.Next(0, 3000);
 			}
 
-			info = null;
-			aver = 0;
-			absver = 0;
+			ResetData(out allSumTime, out info, out averTime, out absErr);
 			for (int i = 0; i < LAUNCH_COUNT; ++i)
 			{
 				sw.Start();
@@ -165,22 +149,13 @@ namespace ACS_Lab2
 
 				sw.Stop();
 
-				time[i] = sw.ElapsedMilliseconds;
-				sum_time += time[i];
-				summand1 += time[i] * time[i];
-				summand2 += time[i];
+				allSumTime += sw.ElapsedMilliseconds;
+				averTime = allSumTime / (i + 1);
+				absErr = Math.Abs(averTime - sw.ElapsedMilliseconds);
 
-				aver = sum_time / LAUNCH_COUNT;
-				for (int j = 0; j < LAUNCH_COUNT; ++j)
-				{
-					absver += Math.Abs(aver - time[j]);
-				}
-				absver /= LAUNCH_COUNT;
-
-				//TODO: Сделать AbsError - Absolute error
-				//TODO: Сделать RelError - Relative error
-				info = new Info(cpuName, "double", opt, LAUNCH_COUNT, aver, time[0], dispersion, LAUNCH_COUNT / aver, absver, nameof(DoubleMulSin));
+				info = new Info(cpuName, "double", opt, SIZE_ARR * SIZE_ARR, averTime / 1000, sw.ElapsedMilliseconds / 1000.0, absErr / 1000, SIZE_ARR * SIZE_ARR / (averTime / 1000), LAUNCH_COUNT, nameof(DoubleMulSin));
 				listInfo.Add(info);
+				sw.Reset();
 			}
 
 			SaveToCSV(listInfo);
@@ -188,42 +163,23 @@ namespace ACS_Lab2
 			#endregion
 
 			#region DoubleMulCos
-			var arr5 = new double[SIZE_ARR];
-			var arr6 = new double[SIZE_ARR];
 
-			for (int i = 0; i < SIZE_ARR; ++i)
-			{
-				arr5[i] = _random.Next(0, 3000);
-				arr6[i] = _random.Next(0, 3000);
-			}
-
-			info = null;
-			aver = 0;
-			absver = 0;
+			ResetData(out allSumTime, out info, out averTime, out absErr);
 			for (int i = 0; i < LAUNCH_COUNT; ++i)
 			{
 				sw.Start();
 
-				DoubleMulCos(arr5, arr6, SIZE_ARR);
+				DoubleMulCos(arr3, arr4, SIZE_ARR);
 
 				sw.Stop();
 
-				time[i] = sw.ElapsedMilliseconds;
-				sum_time += time[i];
-				summand1 += time[i] * time[i];
-				summand2 += time[i];
+				allSumTime += sw.ElapsedMilliseconds;
+				averTime = allSumTime / (i + 1);
+				absErr = Math.Abs(averTime - sw.ElapsedMilliseconds);
 
-				aver = sum_time / LAUNCH_COUNT;
-				for (int j = 0; j < LAUNCH_COUNT; ++j)
-				{
-					absver += Math.Abs(aver - time[j]);
-				}
-				absver /= LAUNCH_COUNT;
-
-				//TODO: Сделать AbsError - Absolute error
-				//TODO: Сделать RelError - Relative error
-				info = new Info(cpuName, "double", opt, LAUNCH_COUNT, aver, time[0], dispersion, LAUNCH_COUNT / aver, absver, nameof(DoubleMulCos));
+				info = new Info(cpuName, "double", opt, SIZE_ARR * SIZE_ARR, averTime / 1000, sw.ElapsedMilliseconds / 1000.0, absErr / 1000, SIZE_ARR * SIZE_ARR / (averTime / 1000), LAUNCH_COUNT, nameof(DoubleMulCos));
 				listInfo.Add(info);
+				sw.Reset();
 			}
 
 			SaveToCSV(listInfo);
@@ -232,6 +188,14 @@ namespace ACS_Lab2
 
 			SWAllTime.Stop();
 			Console.WriteLine($"All time: {SWAllTime.ElapsedMilliseconds}");
+		}
+
+		private static void ResetData(out double allSumTime, out Info info, out double averTime, out double absErr)
+		{
+			info = null;
+			averTime = 0;
+			absErr = 0;
+			allSumTime = 0;
 		}
 	}
 }
